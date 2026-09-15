@@ -14,9 +14,10 @@ export const metadata: Metadata = {
     "Kelvin Wu — Computer Science + Statistics @ UBC. Interested in software engineering, backend systems, and building useful things.",
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon.svg", type: "image/svg+xml" },
     ],
-    shortcut: "/favicon.svg",
+    shortcut: "/favicon.ico",
     apple: "/favicon.svg",
   },
 };
