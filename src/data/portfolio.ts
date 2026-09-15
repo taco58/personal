@@ -1,5 +1,6 @@
 export interface ProjectItem {
   name: string;
+  tech: string;
   url: string;
 }
 
@@ -26,14 +27,17 @@ export const personal = {
 export const projects: ProjectItem[] = [
   {
     name: "Beam — Peer-to-Peer Network File Transfer CLI",
+    tech: "Python · TCP/UDP Sockets · Threading · CLI",
     url: "https://github.com/taco58/beam",
   },
   {
     name: "Distributed Uptime Monitoring Platform",
+    tech: "Go · Redis · PostgreSQL · Kubernetes · AWS",
     url: "https://github.com/taco58/uptime",
   },
   {
     name: "Adaptive TDEE & Health Analytics Platform",
+    tech: "Next.js · TypeScript · Supabase · PostgreSQL",
     url: "https://github.com/taco58/tdee",
   },
 ];

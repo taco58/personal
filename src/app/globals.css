@@ -1,9 +1,16 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #111111;
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -23,17 +30,33 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html.dark {
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
+}
+
 body {
   margin: 0;
   background-color: #ffffff;
   color: #111111;
   font-family: var(--font-sans);
   text-rendering: optimizeLegibility;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+html.dark body {
+  background-color: #0a0a0a !important;
+  color: #ededed !important;
 }
 
 ::selection {
   background: #111111;
   color: #ffffff;
+}
+
+html.dark ::selection {
+  background: #ededed;
+  color: #0a0a0a;
 }
 
 a {

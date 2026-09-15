@@ -22,8 +22,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#ffffff",
-  colorScheme: "light",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({
@@ -32,8 +34,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full`}>
-      <body className="min-h-full bg-white text-[#111111] font-sans antialiased">
+    <html lang="en" className={`${geistSans.variable} h-full`} suppressHydrationWarning>
+      <body className="min-h-full bg-white dark:bg-[#0a0a0a] text-[#111111] dark:text-[#ededed] font-sans antialiased">
         {children}
       </body>
     </html>

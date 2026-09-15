@@ -68,6 +68,13 @@ const FISH_ITEMS: FishItem[] = [
     description: "Reads: 'Let's build something: kelvinwu0002@gmail.com'",
   },
   {
+    id: "cheeseball",
+    name: "Golden Cheeseball",
+    icon: "🧀",
+    rarity: "Legendary",
+    description: "Crispy, cheddar-dusted, and immortal.",
+  },
+  {
     id: "koi",
     name: "Golden Koi",
     icon: "⭐",
@@ -84,7 +91,7 @@ export function FishingGame() {
   const [caughtItem, setCaughtItem] = useState<FishItem | null>(null);
   const [inventory, setInventory] = useState<Record<string, number>>({});
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [statusMessage, setStatusMessage] = useState("Click the pond or [Cast Line] to begin.");
+  const [statusMessage, setStatusMessage] = useState("Click the pond or press Space / F to cast.");
 
   const stateRef = useRef<GameState>("idle");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -180,14 +187,14 @@ export function FishingGame() {
         setStatusMessage("Waiting for a bite...");
         soundSplash();
 
-        const waitDuration = 2000 + Math.random() * 2500;
+        const waitDuration = 1800 + Math.random() * 2400;
         timerRef.current = setTimeout(() => {
           setGameState("nibble");
           playTone(400, "triangle", 0.05);
 
           timerRef.current = setTimeout(() => {
             setGameState("bite");
-            setStatusMessage("BITE! Click to reel in!");
+            setStatusMessage("BITE! Click or press Space / F to reel!");
             soundBite();
 
             timerRef.current = setTimeout(() => {
@@ -211,12 +218,13 @@ export function FishingGame() {
 
       const roll = Math.random();
       let picked: FishItem;
-      if (roll < 0.04) {
-        picked = FISH_ITEMS.find((i) => i.rarity === "Legendary") || FISH_ITEMS[0];
-      } else if (roll < 0.22) {
+      if (roll < 0.06) {
+        const legendaries = FISH_ITEMS.filter((i) => i.rarity === "Legendary");
+        picked = legendaries[Math.floor(Math.random() * legendaries.length)];
+      } else if (roll < 0.25) {
         const rares = FISH_ITEMS.filter((i) => i.rarity === "Rare");
         picked = rares[Math.floor(Math.random() * rares.length)];
-      } else if (roll < 0.58) {
+      } else if (roll < 0.60) {
         const uncommons = FISH_ITEMS.filter((i) => i.rarity === "Uncommon");
         picked = uncommons[Math.floor(Math.random() * uncommons.length)];
       } else {
@@ -235,6 +243,24 @@ export function FishingGame() {
   }, [soundCast, soundSplash, soundBite, soundCatch, playTone]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (!isInput && (e.code === "Space" || e.code === "KeyF")) {
+        e.preventDefault();
+        handleAction();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleAction]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -247,14 +273,15 @@ export function FishingGame() {
       const w = canvas.width;
       const h = canvas.height;
       const waterY = 74;
+      const isDark = document.documentElement.classList.contains("dark");
 
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, w, h);
 
-      ctx.fillStyle = "#ffffff";
+      ctx.fillStyle = isDark ? "#0f0f12" : "#ffffff";
       ctx.fillRect(0, 0, w, waterY);
 
-      ctx.fillStyle = "#f4f4f5";
+      ctx.fillStyle = isDark ? "#18181b" : "#f4f4f5";
       cloudsRef.current.forEach((cloud) => {
         cloud.x += cloud.speed;
         if (cloud.x > w + 40) cloud.x = -50;
@@ -263,10 +290,10 @@ export function FishingGame() {
         ctx.fillRect(cx + 4, cloud.y - 3, cloud.w - 8, 3);
       });
 
-      ctx.fillStyle = "#fafafa";
+      ctx.fillStyle = isDark ? "#0a0a0d" : "#fafafa";
       ctx.fillRect(0, waterY, w, h - waterY);
 
-      ctx.strokeStyle = "#e4e4e7";
+      ctx.strokeStyle = isDark ? "#27272a" : "#e4e4e7";
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(0, waterY);
@@ -285,7 +312,7 @@ export function FishingGame() {
         }
       }
 
-      ctx.fillStyle = "#d4d4d8";
+      ctx.fillStyle = isDark ? "#27272a" : "#d4d4d8";
       fishShadowsRef.current.forEach((fish) => {
         fish.x += fish.speed;
         if (fish.x > w + 24) fish.x = 90;
@@ -301,15 +328,15 @@ export function FishingGame() {
         }
       });
 
-      ctx.fillStyle = "#18181b";
+      ctx.fillStyle = isDark ? "#ededed" : "#18181b";
       ctx.fillRect(0, 48, 64, 26);
-      ctx.fillStyle = "#27272a";
+      ctx.fillStyle = isDark ? "#3f3f46" : "#27272a";
       ctx.fillRect(0, 48, 64, 3);
       ctx.fillRect(18, waterY, 5, h - waterY);
       ctx.fillRect(50, waterY, 5, h - waterY);
 
       for (let i = 0; i < 64; i += 12) {
-        ctx.strokeStyle = "#09090b";
+        ctx.strokeStyle = isDark ? "#27272a" : "#09090b";
         ctx.beginPath();
         ctx.moveTo(i, 49);
         ctx.lineTo(i, 74);
@@ -320,7 +347,7 @@ export function FishingGame() {
       const px = 44;
       const py = 32 + idleBounce;
 
-      ctx.fillStyle = "#18181b";
+      ctx.fillStyle = isDark ? "#fafafa" : "#18181b";
       ctx.fillRect(px + 1, py - 4, 7, 2);
       ctx.fillRect(px + 2, py - 2, 5, 2);
       ctx.fillRect(px + 2, py, 5, 5);
@@ -340,7 +367,7 @@ export function FishingGame() {
         rodTipY = py + 2;
       }
 
-      ctx.strokeStyle = "#18181b";
+      ctx.strokeStyle = isDark ? "#e4e4e7" : "#18181b";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(px + 6, py + 8);
@@ -361,7 +388,7 @@ export function FishingGame() {
 
         bobberYRef.current = bobberY;
 
-        ctx.strokeStyle = "#a1a1aa";
+        ctx.strokeStyle = isDark ? "#52525b" : "#a1a1aa";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(rodTipX, rodTipY);
@@ -377,21 +404,21 @@ export function FishingGame() {
         ctx.fillRect(bobberTargetX - 2, bobberY - 4, 4, 3);
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(bobberTargetX - 2, bobberY - 1, 4, 3);
-        ctx.strokeStyle = "#18181b";
+        ctx.strokeStyle = isDark ? "#09090b" : "#18181b";
         ctx.strokeRect(bobberTargetX - 2.5, bobberY - 4.5, 5, 6);
 
-        ctx.strokeStyle = "#e4e4e7";
+        ctx.strokeStyle = isDark ? "#27272a" : "#e4e4e7";
         const rippleR = 3 + (frame % 24) * 0.3;
         ctx.beginPath();
         ctx.ellipse(bobberTargetX, waterY + 2, rippleR, rippleR * 0.35, 0, 0, Math.PI * 2);
         ctx.stroke();
 
         if (curr === "nibble") {
-          ctx.fillStyle = "#71717a";
+          ctx.fillStyle = isDark ? "#a1a1aa" : "#71717a";
           ctx.font = "bold 10px monospace";
           ctx.fillText("?", bobberTargetX - 2, bobberY - 8);
         } else if (curr === "bite") {
-          ctx.fillStyle = "#18181b";
+          ctx.fillStyle = isDark ? "#ffffff" : "#18181b";
           ctx.font = "bold 15px monospace";
           const biteBounce = Math.sin(frame * 0.4) * 3;
           ctx.fillText("!", bobberTargetX - 3, bobberY - 10 + biteBounce);
@@ -401,13 +428,13 @@ export function FishingGame() {
         ctx.font = "18px sans-serif";
         ctx.fillText(caughtItem.icon, bobberTargetX - 8, floatY);
 
-        ctx.fillStyle = "#e4e4e7";
+        ctx.fillStyle = isDark ? "#71717a" : "#e4e4e7";
         const spark = (frame * 0.1) % (Math.PI * 2);
         ctx.fillRect(bobberTargetX + Math.cos(spark) * 14, floatY + Math.sin(spark) * 8, 2, 2);
         ctx.fillRect(bobberTargetX - Math.cos(spark) * 14, floatY - Math.sin(spark) * 8, 2, 2);
       }
 
-      ctx.strokeStyle = "#e4e4e7";
+      ctx.strokeStyle = isDark ? "#27272a" : "#e4e4e7";
       ctx.strokeRect(0, 0, w, h);
 
       animFrameRef.current = requestAnimationFrame(render);
@@ -430,17 +457,18 @@ export function FishingGame() {
     <div className="space-y-3.5 pt-2">
       <div className="flex items-baseline justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-medium text-neutral-900">Pixel Pond</h2>
-          <span className="text-xs text-neutral-400">
+          <h2 className="text-sm font-medium text-neutral-900 dark:text-neutral-100">Pixel Pond</h2>
+          <span className="text-xs text-neutral-400 dark:text-neutral-500">
             ({uniqueCaught}/{FISH_ITEMS.length} caught)
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 text-xs text-neutral-400 dark:text-neutral-500">
+          <span className="hidden sm:inline font-mono text-[10px]">Space / F</span>
           <button
             type="button"
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors cursor-pointer select-none"
+            className="hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors cursor-pointer select-none"
             title={soundEnabled ? "Mute audio" : "Enable audio"}
           >
             {soundEnabled ? "Sound: On" : "Sound: Off"}
@@ -450,7 +478,7 @@ export function FishingGame() {
 
       <div
         onClick={handleAction}
-        className="relative border border-neutral-200 bg-white rounded cursor-pointer overflow-hidden select-none transition-colors hover:border-neutral-400 active:scale-[0.998]"
+        className="relative border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-[#0c0c0e] rounded cursor-pointer overflow-hidden select-none transition-colors hover:border-neutral-400 dark:hover:border-neutral-600 active:scale-[0.998]"
       >
         <canvas
           ref={canvasRef}
@@ -464,8 +492,8 @@ export function FishingGame() {
           <span
             className={`font-mono text-[10px] px-2 py-0.5 rounded border transition-colors ${
               gameState === "bite"
-                ? "bg-neutral-900 text-white border-neutral-900 font-semibold animate-pulse"
-                : "bg-white/95 text-neutral-600 border-neutral-200"
+                ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-neutral-900 dark:border-white font-semibold animate-pulse"
+                : "bg-white/95 dark:bg-neutral-900/95 text-neutral-600 dark:text-neutral-300 border-neutral-200 dark:border-neutral-800"
             }`}
           >
             {gameState === "idle" && "READY"}
@@ -480,14 +508,14 @@ export function FishingGame() {
       </div>
 
       <div className="flex items-center justify-between gap-3 text-xs">
-        <p className="text-neutral-600 truncate">{statusMessage}</p>
+        <p className="text-neutral-600 dark:text-neutral-400 truncate">{statusMessage}</p>
         <button
           type="button"
           onClick={handleAction}
           className={`font-mono text-xs px-3 py-1.5 rounded transition-all shrink-0 cursor-pointer ${
             gameState === "bite"
-              ? "bg-neutral-900 text-white font-medium hover:bg-black scale-105 shadow-sm"
-              : "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 active:scale-95"
+              ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-medium hover:bg-black scale-105 shadow-sm"
+              : "bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 text-neutral-800 dark:text-neutral-200 active:scale-95"
           }`}
         >
           {gameState === "bite"
@@ -499,25 +527,25 @@ export function FishingGame() {
       </div>
 
       {caughtItem && gameState === "caught" && (
-        <div className="p-3 rounded border border-neutral-200 bg-neutral-50/70 text-xs space-y-1 animate-fadeIn">
+        <div className="p-3 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-50/70 dark:bg-neutral-900/50 text-xs space-y-1">
           <div className="flex items-center justify-between">
-            <span className="font-medium text-neutral-900 flex items-center gap-1.5">
+            <span className="font-medium text-neutral-900 dark:text-white flex items-center gap-1.5">
               <span>{caughtItem.icon}</span>
               <span>{caughtItem.name}</span>
             </span>
             <span
               className={`font-mono text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider ${
                 caughtItem.rarity === "Legendary"
-                  ? "bg-neutral-900 text-white font-bold"
+                  ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-bold"
                   : caughtItem.rarity === "Rare"
-                  ? "bg-neutral-200 text-neutral-800 font-medium"
-                  : "bg-neutral-100 text-neutral-500"
+                  ? "bg-neutral-200 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 font-medium"
+                  : "bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400"
               }`}
             >
               {caughtItem.rarity}
             </span>
           </div>
-          <p className="text-neutral-600 text-[11px] leading-relaxed">
+          <p className="text-neutral-600 dark:text-neutral-400 text-[11px] leading-relaxed">
             {caughtItem.description}
           </p>
         </div>
@@ -525,10 +553,10 @@ export function FishingGame() {
 
       {totalCaught > 0 && (
         <div className="pt-1">
-          <div className="text-[11px] text-neutral-400 font-mono mb-1.5">
+          <div className="text-[11px] text-neutral-400 dark:text-neutral-500 font-mono mb-1.5">
             Fish Logbook ({totalCaught} items):
           </div>
-          <div className="grid grid-cols-3 gap-1.5 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs">
             {FISH_ITEMS.map((item) => {
               const count = inventory[item.id] || 0;
               const isDiscovered = count > 0;
@@ -537,8 +565,8 @@ export function FishingGame() {
                   key={item.id}
                   className={`p-1.5 rounded border transition-colors flex items-center justify-between ${
                     isDiscovered
-                      ? "border-neutral-200 bg-white text-neutral-800"
-                      : "border-neutral-100 bg-neutral-50/50 text-neutral-300"
+                      ? "border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-800 dark:text-neutral-200"
+                      : "border-neutral-100 dark:border-neutral-850 bg-neutral-50/50 dark:bg-neutral-950/40 text-neutral-300 dark:text-neutral-600"
                   }`}
                   title={isDiscovered ? item.description : "Not yet discovered"}
                 >
@@ -547,7 +575,7 @@ export function FishingGame() {
                     <span className="truncate">{isDiscovered ? item.name : "???"}</span>
                   </span>
                   {isDiscovered && (
-                    <span className="font-mono text-[10px] text-neutral-400 shrink-0 ml-1">
+                    <span className="font-mono text-[10px] text-neutral-400 dark:text-neutral-500 shrink-0 ml-1">
                       ×{count}
                     </span>
                   )}
