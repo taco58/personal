@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: "Kelvin Wu",
   description:
     "Kelvin Wu — Computer Science + Statistics @ UBC. Interested in software engineering, backend systems, and building useful things.",
+  icons: {
+    icon: "data:,",
+  },
 };
 
 export const viewport: Viewport = {

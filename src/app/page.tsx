@@ -1,4 +1,5 @@
 import { personal, projects, experiences, links } from "@/data/portfolio";
+import { FishingGame } from "@/components/FishingGame";
 
 export default function Home() {
   return (
@@ -56,6 +57,10 @@ export default function Home() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section>
+          <FishingGame />
         </section>
 
         <section className="space-y-3 pt-2">
